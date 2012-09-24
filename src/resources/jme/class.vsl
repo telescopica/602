@@ -1,0 +1,39 @@
+package $!{packagename};
+
+import java.io.*;
+import java.util.*;
+import org.xml.sax.*;
+import serempre.jme.rms.*;
+import serempre.jme.xml.*;
+
+public class $!{class.className} extends IPersistable implements IParsingContext, IServerSideIdable {
+##declare class attributes
+#parse("resources/jme/attribute.vsl")
+    
+    /**
+    * default parameterless constructor
+    */
+    public $!{class.className}() {
+##setup entity relationships
+#parse("resources/jme/relationshipsetup.vsl")
+    }
+    /**
+    * value constructor
+#foreach($attribute in $class.attributes)
+    * @param ${attribute.attributeName} initializes this class using this value for the corresponding attribute
+#end
+    */
+    public $!{class.className}(#foreach($attribute in ${class.attributes})${attribute.attributeTypeName} ${attribute.attributeName}#if($foreach.hasNext), #end#end){
+##setup entity relationships
+#parse("resources/jme/relationshipsetup.vsl")
+#foreach($attribute in $class.attributes)
+        m${strUtility.toU1Case($attribute.attributeName)} = ${attribute.attributeName};
+#end
+    }
+##set up getters and setters for every attribute
+#parse("resources/jme/properties.vsl")
+##implement IPersistable abstract methods
+#parse("resources/jme/ipersistable.vsl")
+##implement IParsingContext methods
+#parse("resources/jme/iparsingcontext.vsl")
+}

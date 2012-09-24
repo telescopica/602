@@ -1,0 +1,74 @@
+#foreach($attribute in $class.attributes)
+    /**
+    * @return value of $attribute.attributeName property
+    */
+    public ${attribute.attributeTypeName} get${strUtility.toU1Case($attribute.attributeName)}(){
+        return m${strUtility.toU1Case($attribute.attributeName)};
+    }
+    /**
+    * @param $attribute.attributeName new value for $attribute.attributeName property
+    */
+    public void set${strUtility.toU1Case($attribute.attributeName)}(${attribute.attributeTypeName} $attribute.attributeName){
+        m${strUtility.toU1Case($attribute.attributeName)} = $attribute.attributeName;
+    }
+#end
+#foreach($relation in $class.ownedTypes)
+#if($relation.type.toString().equals("one_to_one"))
+    /**
+    * @return value for ${relation.name} property
+    */
+    public $!{relation.targetClassName} get${strUtility.toU1Case($relation.name)}(){
+        return ($!{relation.targetClassName})getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})}).getTarget();
+    }
+    /**
+    * @param ${relation.name} new value for ${relation.name} property
+    */
+    public void set${strUtility.toU1Case($relation.name)}($!{relation.targetClassName} $relation.name){
+        getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})}).setTarget($!{relation.name});
+    }
+#{else}
+    /**
+    * @return value for ${relation.name} property
+    */
+    public Vector get${strUtility.toU1Case($relation.name)}(){
+        return getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})});
+    }
+    /**
+    * @param newElements new value for ${relation.name} property
+    */
+    public void set${strUtility.toU1Case($relation.name)}(Vector newElements){
+        getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})}).replaceContents(newElements);
+    }
+#end
+#end
+    /**
+    * @return server side entity key
+    */
+    public int getId(){
+        return mId;
+    }
+    /**
+    * @param id server side entity key
+    */
+    public void setId(int id){
+        mId = id;
+    }
+    /**
+    * @param ctx handler for xml content
+    */
+    public void setConsumerContext(ConsumerContext ctx){
+        mCtx = ctx;
+    }
+    /**
+        * overrides default implementation
+        */
+    public int hashCode(){
+        return ((new Integer(mId))).hashCode();
+    }
+    /**
+    * @return string representation for this object
+    */
+    public String toString(){
+        //TODO: change this for something that makes sense for your class
+        return "";
+    }

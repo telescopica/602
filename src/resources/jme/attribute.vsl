@@ -1,0 +1,13 @@
+#foreach($attribute in $class.attributes)
+    protected ${attribute.attributeTypeName} m${strUtility.toU1Case($attribute.attributeName)};
+#end
+#foreach($relation in $class.ownedTypes)
+    protected static String OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})} = "${relation.name}";
+#end
+#foreach($relation in $class.targetedByTypes)#if($relation.type.toString().equals("one_to_many"))
+    protected static String TARGETED_BY_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})} = $!{relation.ownerClassName}.class.getName()+".$!{relation.name}";
+#end
+#end
+    public static String TAG_NAME = "$!{class.className}";
+    protected int mId;
+    protected ConsumerContext mCtx;

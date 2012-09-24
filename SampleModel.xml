@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataModel>
+    <Class name="TestClassName">
+        <Attribute name="testAttribute" type="int"/>
+        <Attribute name="testAttribute2" type="String"/>
+    </Class>
+    <Class name="TestClassName2">
+        <Attribute name="testAttribute" type="int"/>
+        <Attribute name="testAttribute2" type="String"/>
+    </Class>
+</DataModel>

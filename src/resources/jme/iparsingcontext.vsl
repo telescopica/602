@@ -1,0 +1,85 @@
+    /**
+    * @param text text found within this tag
+    */
+    public void characters(String text) {
+        //no text expected within this tag
+    }
+    /**
+    * handles start event for xml tags
+    */
+    public void startElement(String uri, String localName, String qName,
+                    Attributes attributes) throws SAXException {
+        IParsingContext parser = null;
+#foreach($attribute in $class.attributes)
+#if($foreach.count == 1)
+        if(qName.equalsIgnoreCase("${attribute.attributeName}")){
+#elseif($foreach.hasNext)
+        else if(qName.equalsIgnoreCase("${attribute.attributeName}")){
+#else
+        else{
+#end
+            parser = new IParsingContext(){
+                String TAG_NAME = "${attribute.attributeName}";
+                ConsumerContext mCtx;
+                /**
+                * interface implementation
+                */
+                public void setConsumerContext(ConsumerContext ctx) {
+                    mCtx = ctx;
+                }
+                /**
+                * @param text text found within this tag
+                */
+                public void characters(String text) {
+#if($attribute.attributeTypeName.equals("boolean"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(text.toLowerCase().equals("true") || text.equals("1"));
+#elseif($attribute.attributeTypeName.equals("short"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(Short.parseShort(text));
+#elseif($attribute.attributeTypeName.equals("int"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(Integer.parseInt(text));
+#elseif($attribute.attributeTypeName.equals("long"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(Long.parseLong(text));
+#elseif($attribute.attributeTypeName.equals("float"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(Float.parseFloat(text));
+#elseif($attribute.attributeTypeName.equals("double"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(Double.parseDouble(text));
+#elseif($attribute.attributeTypeName.equals("String"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(text);
+#else##if($attribute.attributeTypeName.equals("char"))
+                    set${strUtility.toU1Case($attribute.attributeName)}(text.charAt(0));
+#end
+                }
+                /**
+                * handles start event for xml tags
+                */
+                public void startElement(String uri, String localName, String qName,
+                                Attributes attributes) throws SAXException {
+                    //no tags are expected to start while this is handling xml content
+                }
+                /**
+                * handles end event for all Client tags
+                */
+                public void endElement(String uri, String localName, String qName)
+                                throws SAXException {
+                    if(qName.equalsIgnoreCase(TAG_NAME)){
+                        mCtx.popHandler();
+                    }
+                }
+            };
+        }
+#end
+        if(parser!=null){
+            mCtx.pushHandler(parser);
+        }
+        
+    }
+    /**
+    * handles end event for all Client tags
+    */
+    public void endElement(String uri, String localName, String qName)
+                    throws SAXException {
+        if(qName.equalsIgnoreCase(TAG_NAME)){
+            //TODO: do something to save or update this entity
+            mCtx.popHandler();
+        }
+    }

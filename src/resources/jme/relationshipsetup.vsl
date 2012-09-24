@@ -1,0 +1,13 @@
+        super();
+#foreach($relation in $class.ownedTypes)
+#if($relation.type.toString().equals("one_to_one"))
+        getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.targetClassName}.class);
+#{else}
+        getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.targetClassName}.class);
+#end
+#end
+#foreach($relation in $class.targetedByTypes)
+#if($relation.type.toString().equals("one_to_many"))
+        getManyToOneMappingFor(TARGETED_BY_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.ownerClassName}.class);
+#end
+#end

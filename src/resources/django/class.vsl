@@ -1,0 +1,11 @@
+from django.db import models
+
+#foreach($class in $classes)
+
+class $!{class.className}(models.Model):
+##set attributes and relationships
+#parse("resources/django/attribute.vsl")
+
+
+#end
+

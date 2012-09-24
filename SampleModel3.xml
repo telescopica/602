@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataModel>
+    <Class name="TestClassName">
+        <Attribute name="testAttribute" type="int"/>
+        <Attribute name="testAttribute2" type="String"/>
+    </Class>
+    <Class name="TestClassName2">
+        <Attribute name="testAttribute" type="int"/>
+        <Attribute name="testAttribute2" type="String"/>
+    </Class>
+    <Relationship name="TestRelationship" type="one_to_one" owner="TestClassName" target="TestClassName2"/>
+    <Relationship name="TestRelationship2" type="one_to_many" owner="TestClassName" target="TestClassName2"/>
+    <Relationship name="TestRelationship3" type="one_to_many" owner="TestClassName" target="TestClassName2"/>
+</DataModel>

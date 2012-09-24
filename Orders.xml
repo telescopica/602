@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataModel>
+    <Class name="Order">
+        <Attribute name="orderNumber" type="String"/>
+        <Attribute name="status" type="int"/>
+        <Attribute name="placementDate" type="long"/>
+        <Attribute name="deliveryDate" type="long"/>
+        <Attribute name="eta" type="long"/>
+        <Attribute name="createdBy" type="int"/>
+        <Attribute name="clientId" type="int"/>
+    </Class>
+    <Class name="OrderItem">
+        <Attribute name="amount" type="int"/>
+        <Attribute name="discount" type="float"/>
+        <Attribute name="SKU" type="String"/>
+    </Class>
+    <Class name="OrderEvent">
+        <Attribute name="description" type="String"/>
+        <Attribute name="time" type="long"/>
+        <Attribute name="lastStatus" type="int"/>
+        <Attribute name="status" type="int"/>
+        <Attribute name="modifiedBy" type="int"/>
+    </Class>
+    <Class name="CatalogItem">
+        <Attribute name="oldPrice" type="float"/>
+        <Attribute name="currentPrice" type="float"/>
+        <Attribute name="SKU" type="String"/>
+    </Class>
+    <Class name="Catalog">
+        <Attribute name="clientId" type="int"/>
+    </Class>
+    <Class name="Item">
+        <Attribute name="code" type="String"/>
+        <Attribute name="packagingId" type="int"/>
+        <Attribute name="SKU" type="String"/>
+        <Attribute name="parentSKU" type="String"/>
+        <Attribute name="masterSKU" type="String"/>
+        <Attribute name="thumbnailURL" type="String"/>
+        <Attribute name="pictureURL" type="String"/>
+    </Class>
+    <Relationship name="lastEvent" type="one_to_one" owner="Order" target="OrderEvent"/>
+    <Relationship name="events" type="one_to_many" owner="Order" target="OrderEvent"/>
+    <Relationship name="items" type="one_to_many" owner="Order" target="OrderItem"/>
+    <Relationship name="item" type="one_to_one" owner="OrderItem" target="CatalogItem"/>
+    <Relationship name="item" type="one_to_one" owner="CatalogItem" target="Item"/>
+    <Relationship name="items" type="one_to_many" owner="Catalog" target="CatalogItem"/>
+</DataModel>

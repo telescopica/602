@@ -1,0 +1,160 @@
+package $!{domain.packageName};
+
+import java.io.*;
+import java.util.*;
+import serempre.jme.rms.*;
+
+public class $!{class.className} extends IPersistable {
+    
+#foreach($attribute in $class.attributes)
+    protected ${attribute.attributeTypeName} m${strUtility.toU1Case($attribute.attributeName)};
+#end
+#foreach($relation in $class.ownedTypes)
+    protected static String OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})} = "${relation.name}";
+#end
+#foreach($relation in $class.targetedByTypes)#if($relation.type.toString().equals("one_to_many"))
+    protected static String TARGETED_BY_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})} = $!{relation.ownerClassName}.class.getName()+".$!{relation.name}";
+#end
+#end
+    
+    /**
+    * default parameterless constructor
+    */
+    public $!{class.className} {
+        super();
+#foreach($relation in $class.ownedTypes)
+#if($relation.type.toString().equals("one_to_one"))
+        getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.targetClassName}.class);
+#{else}
+        getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.targetClassName}.class);
+#end
+#end
+#foreach($relation in $class.targetedByTypes)
+#if($relation.type.toString().equals("one_to_many"))
+        getManyToOneMappingFor(TARGETED_BY_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.ownerClassName})
+#end
+#end
+    }
+    /**
+    * value constructor
+#foreach($attribute in $class.attributes)
+    * @param ${attribute.attributeName} initializes this class using this value for the corresponding attribute
+#end
+    */
+    public $!{class.className}(#foreach($attribute in ${class.attributes})${attribute.attributeTypeName} ${attribute.attributeName}#if($foreach.hasNext), #end#end){
+        super();
+#foreach($relation in $class.ownedTypes)
+#if($relation.type.toString().equals("one_to_one"))
+        getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.targetClassName}.class);
+#{else}
+        getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.targetClassName}.class);
+#end
+#end
+#foreach($relation in $class.targetedByTypes)
+#if($relation.type.toString().equals("one_to_many"))
+        getManyToOneMappingFor(TARGETED_BY_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})},$!{relation.ownerClassName})
+#end
+#end
+#foreach($attribute in $class.attributes)
+        m${strUtility.toU1Case($attribute.attributeName)} = ${attribute.attributeName};
+#end
+    }
+#foreach($attribute in $class.attributes)
+    /**
+    * @return value of $attribute.attributeName property
+    */
+    public ${attribute.attributeTypeName} get${strUtility.toU1Case($attribute.attributeName)}(){
+        return m${strUtility.toU1Case($attribute.attributeName)};
+    }
+    /**
+    * @param $attribute.attributeName new value for $attribute.attributeName property
+    */
+    public void set${strUtility.toU1Case($attribute.attributeName)}(${attribute.attributeTypeName} $attribute.attributeName){
+        m${strUtility.toU1Case($attribute.attributeName)} = $attribute.attributeName;
+    }
+#end
+#foreach($relation in $class.ownedTypes)
+#if($relation.type.toString().equals("one_to_one"))
+    /**
+    * @return value for ${relation.name} property
+    */
+    public $!{relation.targetClassName} get${strUtility.toU1Case($relation.name)}(){
+        return ($!{relation.targetClassName})getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})}).getTarget();
+    }
+    /**
+    * @param ${relation.name} new value for ${relation.name} property
+    */
+    public void set${strUtility.toU1Case($relation.name)}($!{relation.targetClassName} $relation.name){
+        getOneToOneMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})}).setTarget($!{relation.name});
+    }
+#{else}
+    /**
+    * @return value for ${relation.name} property
+    */
+    public Vector get${strUtility.toU1Case($relation.name)}(){
+        return getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})});
+    }
+    /**
+    * @param newElements new value for ${relation.name} property
+    */
+    public void set${strUtility.toU1Case($relation.name)}(Vector newElements){
+        getOneToManyMappingFor(OWNED_RELATIONSHIP_${strUtility.toStaticVarName(${relation.name})}).replaceContents(newElements);
+    }
+#end
+#end
+    /**
+    * interface implementation
+    */
+    public void writeToByteStream(DataOutputStream dos) throws IOException {
+#foreach($attribute in $class.attributes)
+#if($attribute.attributeTypeName.equals("boolean"))
+        dos.writeBoolean(m${strUtility.toU1Case($attribute.attributeName)});
+#elseif($attribute.attributeTypeName.equals("short"))
+        dos.writeShort(m${strUtility.toU1Case($attribute.attributeName)});
+#elseif($attribute.attributeTypeName.equals("int"))
+        dos.writeInt(m${strUtility.toU1Case($attribute.attributeName)});
+#elseif($attribute.attributeTypeName.equals("long"))
+        dos.writeLong(m${strUtility.toU1Case($attribute.attributeName)});
+#elseif($attribute.attributeTypeName.equals("float"))
+        dos.writeFloat(m${strUtility.toU1Case($attribute.attributeName)});
+#elseif($attribute.attributeTypeName.equals("double"))
+        dos.writeouble(m${strUtility.toU1Case($attribute.attributeName)});
+#elseif($attribute.attributeTypeName.equals("String"))
+        dos.writeUTF(m${strUtility.toU1Case($attribute.attributeName)});
+#else##if($attribute.attributeTypeName.equals("char"))
+        dos.writeChar(m${strUtility.toU1Case($attribute.attributeName)});
+#end
+#end
+    }
+    /**
+    * interface implementation
+    */
+    public void readFromByteStream(DataInputStream dis) throws IOException {
+#foreach($attribute in $class.attributes)
+#if($attribute.attributeTypeName.equals("boolean"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readBoolean();
+#elseif($attribute.attributeTypeName.equals("short"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readShort();
+#elseif($attribute.attributeTypeName.equals("int"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readInt();
+#elseif($attribute.attributeTypeName.equals("long"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readLong();
+#elseif($attribute.attributeTypeName.equals("float"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readFloat();
+#elseif($attribute.attributeTypeName.equals("double"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readDouble();
+#elseif($attribute.attributeTypeName.equals("String"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readUTF();
+#else##($attribute.attributeTypeName.equals("char"))
+        m${strUtility.toU1Case($attribute.attributeName)} = dis.readChar();
+#end
+#end
+    }
+    /**
+    * interface implementation
+    */
+    public String getRecordStoreName() {
+        //TODO: change this for something better
+        return "$!{class.className}".subString(1,5)};
+    }
+}
