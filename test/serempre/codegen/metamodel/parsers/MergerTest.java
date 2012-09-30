@@ -58,7 +58,7 @@ public class MergerTest extends Merger {
     @Override
     public void merge(ModelParser domain, String outputPath) throws ParserConfigurationException, SAXException, IOException {
         //template location is regarded as the template's name
-        String templateName = "resources/jme/class.vsl";
+        String templateName = getTemplateName();
         //prepare to iterate through all classes in this business domain
         Iterator<String> classes = null;
         //get an iterator for the classes in the business domain
@@ -78,10 +78,10 @@ public class MergerTest extends Merger {
             //register transformed class so that it becomes available to the template
             mVelocityContext.put("class", classDescriptor);
             //make sure output folder exists
-            buildTargetPath(getPathToFile("/output"));
+            buildTargetPath(getPathToFile(outputPath));
             //build a path to the resulting file
             String outputFilePath = classDescriptor.getClassName();
-            outputFilePath = "/output/"+classDescriptor.getClassName()+".java";
+            outputFilePath = outputPath+ System.getProperty("file.separator") +classDescriptor.getClassName()+".java";
             outputFilePath = getPathToFile(outputFilePath);
             try{
                 //schedule generated file for deletion

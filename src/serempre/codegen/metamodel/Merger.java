@@ -121,12 +121,12 @@ public abstract class Merger {
         //build a template object using targeted template
         Template template = Velocity.getTemplate(templateName);
         //make sure output folder exists
-        buildTargetPath(getPathToFile("/output"));
+        buildTargetPath(getPathToFile(outputPath));
         //check transformation mode and if bulk, then start model transformation
         if(bulkTransformation()){
             try{
                 //create a path to the file to which to output a transformed model
-                String outputFilePath = String.format("/output/%s.%s", getPackageName(), getTargetFileExtension());
+                String outputFilePath = String.format("%s%s%s.%s", outputPath, System.getProperty("file.separator"), getPackageName(), getTargetFileExtension());
                 //make the path relative to the jar's execution context
                 outputFilePath = getPathToFile(outputFilePath);
                 //open up a file stream
@@ -144,7 +144,7 @@ public abstract class Merger {
                 //for each class in the model
                 for(ClassDescriptor classDescriptor : domain.getClasses().values()){
                     //create a path to the file to which to output a transformed class
-                    String outputFilePath = String.format("/output/%s.%s", classDescriptor.getClassName(), getTargetFileExtension());
+                    String outputFilePath = String.format("%s%s%s.%s", outputPath, System.getProperty("file.separator"), classDescriptor.getClassName(), getTargetFileExtension());
                     //make the path relative to the jar's execution context
                     outputFilePath = getPathToFile(outputFilePath);
                     //open up a file stream
