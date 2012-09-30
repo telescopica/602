@@ -154,4 +154,26 @@ public class MergerTest extends Merger {
             fail();
         }
     }
+
+    @Override
+    public String getTemplateName() {
+        //template location is regarded as the template's name
+        String templateName = "resources/jme/class.vsl";
+        return templateName;
+    }
+
+    @Override
+    public boolean bulkTransformation() {
+        return false;
+    }
+
+    @Override
+    public String getPackageName() {
+        return "hive.models";
+    }
+
+    @Override
+    public String getTargetFileExtension() {
+        return "java";
+    }
 }

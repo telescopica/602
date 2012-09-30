@@ -4,13 +4,18 @@
  */
 package serempre.codegen.metamodel;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.exception.TemplateInitException;
 import org.xml.sax.SAXException;
 import serempre.codegen.metamodel.parsers.ModelParser;
 import static resources.ResourceUtility.*;
@@ -80,9 +85,81 @@ public abstract class Merger {
         merge(domain, outputPath);
     }
     /**
+     * gets the path for the template being used during a model transformation
+     * @return jar relative URL like 'resources/attribute.vsl'
+     */
+    public abstract String getTemplateName();
+    /**
+     * if this is set to true, then the model will be transformed and written to a single file. If set to false, then each class in the model will be processed on it's own 
+     * @return true when model transformation is to be rendered in a single file. False when each class should be processed on it's own
+     */
+    public abstract boolean bulkTransformation();
+    /**
+     * returns the name of the model being processed
+     * @return the name of the model being processed
+     */
+    public abstract String getPackageName();
+    /**
+     * returns the extension used for output files
+     * @return something like 'java', 'py', 'c', and so on
+     */
+    public abstract String getTargetFileExtension();
+    /**
      * processes the domain and applies any needed transformations to output application source doe
      * @param domain representation for the application business model
      * @param outputPath a path where all output files are to be written to
      */
-    public abstract void merge(ModelParser domain, String outputPath) throws ParserConfigurationException, SAXException, IOException;
+    public void merge(ModelParser domain, String outputPath) throws ParserConfigurationException, SAXException, IOException {
+        //template location is regarded as the template's name
+        String templateName = this.getTemplateName();
+        //prepare a buffer to write to an output file
+        BufferedWriter writer = null;
+        //if the test template is unavalable, then fail this test
+        if(!Velocity.resourceExists(templateName)){
+            throw new ResourceNotFoundException(String.format("template is not available: %s", templateName));
+        }
+        //build a template object using targeted template
+        Template template = Velocity.getTemplate(templateName);
+        //make sure output folder exists
+        buildTargetPath(getPathToFile("/output"));
+        //check transformation mode and if bulk, then start model transformation
+        if(bulkTransformation()){
+            try{
+                //create a path to the file to which to output a transformed model
+                String outputFilePath = String.format("/output/%s.%s", getPackageName(), getTargetFileExtension());
+                //make the path relative to the jar's execution context
+                outputFilePath = getPathToFile(outputFilePath);
+                //open up a file stream
+                writer = new BufferedWriter(new FileWriter(outputFilePath));
+                //perform model transformation
+                template.merge(mVelocityContext, writer);
+            }finally{
+                if(writer!=null){
+                    writer.flush();
+                    writer.close();
+                }
+            }
+        }else {
+            try{
+                //for each class in the model
+                for(ClassDescriptor classDescriptor : domain.getClasses().values()){
+                    //create a path to the file to which to output a transformed class
+                    String outputFilePath = String.format("/output/%s.%s", classDescriptor.getClassName(), getTargetFileExtension());
+                    //make the path relative to the jar's execution context
+                    outputFilePath = getPathToFile(outputFilePath);
+                    //open up a file stream
+                    writer = new BufferedWriter(new FileWriter(outputFilePath));
+                    //create a new context variable called class which holds this particular class descriptor
+                    mVelocityContext.put("class", classDescriptor);
+                    //render model transformation
+                    template.merge(mVelocityContext, writer);
+                }
+            }finally{
+                if(writer!=null){
+                    writer.flush();
+                    writer.close();
+                }
+            }
+        }
+    }
 }
