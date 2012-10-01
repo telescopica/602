@@ -28,9 +28,10 @@ import serempre.codegen.metamodel.ClassDescriptor;
  * @author Thor
  */
 public class MergerTest extends Merger {
-
+    public enum TEMPLATE_TEST { JME, DJANGO };
     protected java.util.Stack<String> mFilesToDelete = new Stack<String>();
     protected boolean mDeleteTargetFiles = false;
+    protected TEMPLATE_TEST mTemplateToTest = TEMPLATE_TEST.JME;
     
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -50,53 +51,7 @@ public class MergerTest extends Merger {
         if(mDeleteTargetFiles){
             while(!mFilesToDelete.empty()){
                 File toDelete = new File(mFilesToDelete.pop());
-                toDelete.deleteOnExit();
-            }
-        }
-    }
-    
-    @Override
-    public void merge(ModelParser domain, String outputPath) throws ParserConfigurationException, SAXException, IOException {
-        //template location is regarded as the template's name
-        String templateName = getTemplateName();
-        //prepare to iterate through all classes in this business domain
-        Iterator<String> classes = null;
-        //get an iterator for the classes in the business domain
-        classes = domain.getClasses().keySet().iterator();
-        while(classes.hasNext()){
-            //get a class from the businss domain
-            String key = classes.next();
-            ClassDescriptor classDescriptor = domain.getClasses().get(key);
-            //if the test template is unavalable, then fail this test
-            if(!Velocity.resourceExists(templateName)){
-                fail();
-            }
-            //build a template using the test template file
-            Template template = Velocity.getTemplate(templateName);
-            //prepare a buffer to write to an output file
-            BufferedWriter writer = null;
-            //register transformed class so that it becomes available to the template
-            mVelocityContext.put("class", classDescriptor);
-            //make sure output folder exists
-            buildTargetPath(getPathToFile(outputPath));
-            //build a path to the resulting file
-            String outputFilePath = classDescriptor.getClassName();
-            outputFilePath = outputPath+ System.getProperty("file.separator") +classDescriptor.getClassName()+".java";
-            outputFilePath = getPathToFile(outputFilePath);
-            try{
-                //schedule generated file for deletion
-                mFilesToDelete.push(outputFilePath);
-                //generate code using target emplate
-                writer = new BufferedWriter(new FileWriter(mFilesToDelete.peek()));
-                //write code into generated file
-                template.merge(mVelocityContext, writer);
-                
-            }
-            finally{
-                if(writer!=null){
-                    writer.flush();
-                    writer.close();
-                }
+                toDelete.delete();
             }
         }
     }
@@ -104,6 +59,7 @@ public class MergerTest extends Merger {
     @Test
     public void testMerge(){
         MergerTest test = new MergerTest();
+        test.mTemplateToTest = TEMPLATE_TEST.JME;
         try {
             test.init();
         } catch (URISyntaxException ex) {
@@ -134,6 +90,32 @@ public class MergerTest extends Merger {
     @Test
     public void testMerge2(){
         MergerTest test = new MergerTest();
+        test.mTemplateToTest = TEMPLATE_TEST.JME;
+        try {
+            test.init();
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+        try {
+            test.mVelocityContext.put("packagename", "hive.models");
+            test.start("Orders.xml", "output");
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        } catch (SAXException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        } catch (IOException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+    }
+    
+    @Test
+    public void testMerge3(){
+        MergerTest test = new MergerTest();
+        test.mTemplateToTest = TEMPLATE_TEST.DJANGO;
         try {
             test.init();
         } catch (URISyntaxException ex) {
@@ -158,13 +140,30 @@ public class MergerTest extends Merger {
     @Override
     public String getTemplateName() {
         //template location is regarded as the template's name
-        String templateName = "resources/jme/class.vsl";
+        String templateName = null;
+        switch(mTemplateToTest){
+            case JME:
+                templateName = "resources/jme/class.vsl";
+                break;
+            case DJANGO:
+                templateName = "resources/django/class.vsl";
+                break;
+        }
         return templateName;
     }
 
     @Override
     public boolean bulkTransformation() {
-        return false;
+        boolean bulk = true;
+        switch(mTemplateToTest){
+            case JME:
+                bulk = false;
+                break;
+            case DJANGO:
+                bulk = true;
+                break;
+        }
+        return bulk;
     }
 
     @Override
@@ -174,6 +173,15 @@ public class MergerTest extends Merger {
 
     @Override
     public String getTargetFileExtension() {
-        return "java";
+        String fileExtension = "";
+        switch(mTemplateToTest){
+            case JME:
+                fileExtension = "java";
+                break;
+            case DJANGO:
+                fileExtension = "py";
+                break;
+        }
+        return fileExtension;
     }
 }

@@ -110,27 +110,29 @@ public abstract class Merger {
      * @param outputPath a path where all output files are to be written to
      */
     public void merge(ModelParser domain, String outputPath) throws ParserConfigurationException, SAXException, IOException {
-        //template location is regarded as the template's name
-        String templateName = this.getTemplateName();
         //prepare a buffer to write to an output file
         BufferedWriter writer = null;
+        //template location is regarded as the template's name
+        String templateName = this.getTemplateName();
         //if the test template is unavalable, then fail this test
         if(!Velocity.resourceExists(templateName)){
             throw new ResourceNotFoundException(String.format("template is not available: %s", templateName));
         }
         //build a template object using targeted template
         Template template = Velocity.getTemplate(templateName);
-        //make sure output folder exists
-        buildTargetPath(getPathToFile(outputPath));
         //check transformation mode and if bulk, then start model transformation
         if(bulkTransformation()){
             try{
+                //make sure output folder exists
+                buildTargetPath(getPathToFile(outputPath));
                 //create a path to the file to which to output a transformed model
                 String outputFilePath = String.format("%s%s%s.%s", outputPath, System.getProperty("file.separator"), getPackageName(), getTargetFileExtension());
                 //make the path relative to the jar's execution context
                 outputFilePath = getPathToFile(outputFilePath);
                 //open up a file stream
                 writer = new BufferedWriter(new FileWriter(outputFilePath));
+                //create a new context variable called classes which holds all classes in the model
+                mVelocityContext.put("classes", domain.getClasses().values());
                 //perform model transformation
                 template.merge(mVelocityContext, writer);
             }finally{
@@ -140,9 +142,12 @@ public abstract class Merger {
                 }
             }
         }else {
-            try{
-                //for each class in the model
-                for(ClassDescriptor classDescriptor : domain.getClasses().values()){
+            
+            //for each class in the model
+            for(ClassDescriptor classDescriptor : domain.getClasses().values()){
+                try{
+                    //make sure output folder exists
+                    buildTargetPath(getPathToFile(outputPath));
                     //create a path to the file to which to output a transformed class
                     String outputFilePath = String.format("%s%s%s.%s", outputPath, System.getProperty("file.separator"), classDescriptor.getClassName(), getTargetFileExtension());
                     //make the path relative to the jar's execution context
@@ -153,12 +158,12 @@ public abstract class Merger {
                     mVelocityContext.put("class", classDescriptor);
                     //render model transformation
                     template.merge(mVelocityContext, writer);
-                }
-            }finally{
+                }finally{
                 if(writer!=null){
                     writer.flush();
                     writer.close();
                 }
+            }
             }
         }
     }

@@ -1,7 +1,8 @@
 #foreach($attribute in $class.attributes)
     $attribute.attributeName = models.#if($attribute.attributeTypeName.equals("boolean"))NullBooleanField()#elseif($attribute.attributeTypeName.equals("short"))SmallIntegerField()#elseif($attribute.attributeTypeName.equals("int"))IntegerField()#elseif($attribute.attributeTypeName.equals("long"))BigIntegerField()#elseif($attribute.attributeTypeName.equals("float"))FloatField()#elseif($attribute.attributeTypeName.equals("double"))FloatField()#elseif($attribute.attributeTypeName.equals("String"))CharField()#elseif($attribute.attributeTypeName.equals("char"))CharField()#end
+
 #end
 #foreach($relation in $class.ownedTypes)
-    $relation.name = model.#if($relation.type.toString().equals("one_to_many"))ForeignKey('${relation.ownerClass.className}')#elseif($relation.type.toString().equals("one_to_one"))ForeignKey('${relation.ownerClass.className}')#elseif($relation.type.toString().equals("many_to_many"))ManyToManyField('${relation.ownerClass.className}')#end
-#end
+    $relation.name = models.#if($relation.type.toString().equals("one_to_many"))ForeignKey('${relation.ownerClass.className}')#elseif($relation.type.toString().equals("one_to_one"))ForeignKey('${relation.ownerClass.className}')#elseif($relation.type.toString().equals("many_to_many"))ManyToManyField('${relation.ownerClass.className}')#end
 
+#end
