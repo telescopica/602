@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataModel>
+    <Class name="Court">
+        <Attribute name="gameType" type="String" fieldAttributes='max_length=20, choices=GAME_TYPES, default=FUTBOL5'/>
+        <Attribute name="width" type="int" fieldAttributes='blank=True, null=True'/>
+        <Attribute name="length" type="int" fieldAttributes='blank=True, null=True'/>
+        <Attribute name="courtType" type="String" fieldAttributes='max_length=20, choices=COURT_TYPES, default="Sintetica"'/>
+    </Class>
+    <Class name="Contact">
+        <Attribute name="name" type="String" fieldAttributes='max_length=30'/>
+        <Attribute name="isACompany" type="Boolean" fieldAttributes='default=False'/>
+        <Attribute name="mobile" type="String" fieldAttributes='max_length=16, blank=True, null=True'/>
+        <Attribute name="phone" type="String" fieldAttributes='max_length=16, blank=True, null=True'/>
+        <Attribute name="email" type="String" alternateType='EmailField'/>
+        <Attribute name="address" type="String" fieldAttributes='max_length=255'/>
+        <Attribute name="docType" type="String" fieldAttributes='choices=DOCUMENT_TYPES'/>
+        <Attribute name="docNumber" type="String" fieldAttributes='max_length=30'/>
+        <Attribute name="url" type="String" alternateType="URLField" fieldAttributes='blank=True, verify_exists=False, null=True'/>
+    </Class>
+    <Class name="Country">
+        <Attribute name="name" type="String" fieldAttributes="max_length=64"/>
+        <Attribute name="countryCode" type="String" fieldAttributes="max_length=2"/>
+    </Class>
+    <Class name="City">
+        <Attribute name="name" type="String" fieldAttributes="max_length=64"/>
+    </Class>
+    <Relationship name="contact" type="one_to_many" owner="Court" target="Contact"/>
+    <Relationship name="country" type="one_to_many" owner="Contact" target="Country"/>
+    <Relationship name="city" type="one_to_many" owner="Contact" target="City"/>
+    <Relationship name="country" type="one_to_many" owner="City" target="Country"/>
+</DataModel>

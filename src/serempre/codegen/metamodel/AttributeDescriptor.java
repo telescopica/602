@@ -21,12 +21,44 @@ public class AttributeDescriptor implements IParsingContext {
     protected String mAttributeName;
     //holds the name for the attribute's type
     protected String mAttributeTypeName;
+    //literal value to use for overriding an attribute type
+    protected String mAlternateType="";
+    //literal value to use when defining an attribute type
+    protected String mFieldAttributes="";
     //this stands for the attributes this tag can handle
-    public enum TAG_ATTRIBUTES { name, type };
+    public enum TAG_ATTRIBUTES { name, type, alternateType, fieldAttributes };
     /**
      * default parameterless constructor
      */
     public AttributeDescriptor(){
+    }
+    /**
+     * fix a new value for an alternate attribute type
+     * @param name alternate attribute type
+     */
+    public void setAlternateType(String name){
+        mAlternateType = name;
+    }
+    /**
+     * fetches alternate attribute type
+     * @return alternate attribute type
+     */
+    public String getAlternateType(){
+        return mAlternateType;
+    }
+    /**
+     * fixes additional field attribute content
+     * @param attributes 
+     */
+    public void setFieldAttributes(String attributes){
+        mFieldAttributes = attributes;
+    }
+    /**
+     * returns additional field attribute content
+     * @return 
+     */
+    public String getFieldAttributes(){
+        return mFieldAttributes;
     }
     /**
      * setter for attribute name
@@ -80,6 +112,15 @@ public class AttributeDescriptor implements IParsingContext {
             mAttributeName = attributes.getValue(TAG_ATTRIBUTES.name.toString());
             //get the attribute's type
             mAttributeTypeName = attributes.getValue(TAG_ATTRIBUTES.type.toString());
+            //find out if alternateType is present
+            if(attributes.getIndex(TAG_ATTRIBUTES.alternateType.name())>-1){
+                mAttributeTypeName = attributes.getValue(TAG_ATTRIBUTES.alternateType.name());
+                mAlternateType = mAttributeTypeName;
+            }
+            //find out if fieldAttributes is present
+            if(attributes.getIndex(TAG_ATTRIBUTES.fieldAttributes.name())>-1){
+                mFieldAttributes = attributes.getValue(TAG_ATTRIBUTES.fieldAttributes.name());
+            }
         }
     }
     /**

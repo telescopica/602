@@ -136,6 +136,31 @@ public class MergerTest extends Merger {
             fail();
         }
     }
+    
+    @Test
+    public void testMerge4(){
+        MergerTest test = new MergerTest();
+        test.mTemplateToTest = TEMPLATE_TEST.DJANGO;
+        try {
+            test.init();
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+        try {
+            test.mVelocityContext.put("packagename", "goal.models");
+            test.start("Goal.xml", "output");
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        } catch (SAXException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        } catch (IOException ex) {
+            Logger.getLogger(MergerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
+    }
 
     @Override
     public String getTemplateName() {
